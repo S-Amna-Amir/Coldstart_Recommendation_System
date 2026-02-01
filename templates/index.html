@@ -63,6 +63,7 @@
 {% for item in recommendations %}
     <div class="item">
         <strong>{{ item.name }}</strong>
+        <div class="price">Price: {{ item.price }}</div>
         <div class="category">Category: {{ item.category }}</div>
         <div class="explanation">{{ item.explanation }}</div>
     </div>

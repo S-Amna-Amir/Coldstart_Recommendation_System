@@ -61,6 +61,7 @@ def recommend_items(
         scored_items.append({
             "item_id": item["id"],
             "name": item["name"],
+            "price": item["price"],
             "category": item["category"],
             "score": round(score, 2),
             "explanation": build_explanation(reasons)
@@ -96,10 +97,7 @@ def home():
 
 @app.route("/api/recommend", methods=["GET"])
 def recommend_api():
-    """
-    API endpoint returning JSON recommendations.
-    """
-
+ 
     preferred_category = request.args.get("preferred_category")
 
     session_context = {}
