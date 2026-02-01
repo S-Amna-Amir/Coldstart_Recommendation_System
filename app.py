@@ -1,7 +1,11 @@
 import random
 from typing import List, Dict, Optional
+from flask import Flask, request, render_template, jsonify
 
+
+app = Flask(__name__)
 random.seed(42)
+
 
 ITEMS = [
     {"id": 1, "name": "Smart Watch", "category": "Technology", "price": 120, "gender_neutral": True},
@@ -17,25 +21,27 @@ ITEMS = [
     {"id": 11, "name": "Film", "category": "Entertainment", "price": 50, "gender_neutral": True},
 ]
 
-# recommendation logic
+
 def recommend_items(
-    session_context: Optional[Dict] = None,
-    seen_items: Optional[List[int]] = None,
+    session_context: Optional[Dict] = None, # eg. preferred category
+    seen_items: Optional[List[int]] = None, 
     top_k: int = 3
 ) -> List[Dict]:
-    session_context = session_context or {} # represents minimal session level signals eg preferred category
-    seen_items = set(seen_items or []) # list of items already shown to user
+
+    session_context = session_context or {}
+    seen_items = set(seen_items or [])
 
     preferred_category = session_context.get("preferred_category")
     scored_items = []
 
     for item in ITEMS:
         if item["id"] in seen_items:
-            continue  # Prefer unseen items
+            continue
+
         score = 0
         reasons = []
 
-        # Coldstart heuristics
+        # Cold-start heuristics
         if item["price"] <= 50:
             score += 2
             reasons.append("affordable for first-time users")
@@ -70,17 +76,39 @@ def build_explanation(reasons: List[str]) -> str:
     return "Recommended because it is " + ", ".join(reasons) + "."
 
 
+@app.route("/", methods=["GET"])
+def home():
+
+    preferred_category = request.args.get("preferred_category")
+
+    session_context = {}
+    if preferred_category:
+        session_context["preferred_category"] = preferred_category
+
+    recommendations = recommend_items(session_context=session_context)
+
+    return render_template(
+        "index.html",
+        recommendations=recommendations,
+        selected_category=preferred_category
+    )
+
+
+@app.route("/api/recommend", methods=["GET"])
+def recommend_api():
+    """
+    API endpoint returning JSON recommendations.
+    """
+
+    preferred_category = request.args.get("preferred_category")
+
+    session_context = {}
+    if preferred_category:
+        session_context["preferred_category"] = preferred_category
+
+    recommendations = recommend_items(session_context=session_context)
+    return jsonify(recommendations)
+
+
 if __name__ == "__main__":
-
-    print("=== Cold Start (No User Data) ===")
-    recommendations = recommend_items()
-    for r in recommendations:
-        print(f"- {r['name']} ({r['category']}): {r['explanation']}")
-
-    print("\n=== Minimal Session Context (Viewed Technology) ===")
-    session = {"preferred_category": "Technology"}
-    seen = [1]  
-
-    recommendations = recommend_items(session_context=session, seen_items=seen)
-    for r in recommendations:
-        print(f"- {r['name']} ({r['category']}): {r['explanation']}")
+    app.run(debug=True)

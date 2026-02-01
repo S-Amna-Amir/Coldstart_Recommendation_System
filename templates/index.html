@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cold-Start Recommendation System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h1 {
+            margin-bottom: 10px;
+        }
+        form {
+            margin-bottom: 30px;
+        }
+        .item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .category {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .explanation {
+            margin-top: 8px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Cold-Start Recommendation Demo</h1>
+<p>
+    This demo shows how recommendations work with no user data
+    and with minimal session-level context.
+</p>
+
+<form method="get">
+    <label for="preferred_category">Simulate viewed category:</label>
+    <select name="preferred_category" id="preferred_category">
+        <option value="">None (true cold start)</option>
+        <option value="Technology" {% if selected_category == "Technology" %}selected{% endif %}>
+            Technology
+        </option>
+        <option value="Food" {% if selected_category == "Food" %}selected{% endif %}>
+            Food
+        </option>
+        <option value="Entertainment" {% if selected_category == "Entertainment" %}selected{% endif %}>
+            Entertainment
+        </option>
+        <option value="Accessories" {% if selected_category == "Accessories" %}selected{% endif %}>
+            Accessories
+        </option>
+    </select>
+    <button type="submit">Get Recommendations</button>
+</form>
+
+<h2>Recommended Items</h2>
+
+{% for item in recommendations %}
+    <div class="item">
+        <strong>{{ item.name }}</strong>
+        <div class="category">Category: {{ item.category }}</div>
+        <div class="explanation">{{ item.explanation }}</div>
+    </div>
+{% endfor %}
+
+</body>
+</html>
